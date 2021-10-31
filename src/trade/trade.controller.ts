@@ -6,22 +6,27 @@ export class TradeController {
   constructor(private tradeService: TradeService) {}
 
   @Get('/:landCode/:yearMonth')
-  async getTrades(
+  public async getTrades(
     @Res() res,
     @Param('landCode') landCode,
     @Param('yearMonth') yearMonth,
   ) {
-    const trades = await this.tradeService.getTrades(landCode, yearMonth);
-
-    if (trades) {
-      return res.status(HttpStatus.OK).json(trades);
+    const result = await this.tradeService.getTrades(landCode, yearMonth);
+    if (result) {
+      return res.status(HttpStatus.OK).json(JSON.parse(result.data));
     }
 
-    const newTrade = await this.tradeService.createTrade({
-      landCode,
-      yearMonth,
-    });
+    const isBeforeMonth = this.tradeService.isBeforeMonth(yearMonth);
+    if (isBeforeMonth) {
+      const createResult = await this.tradeService.createTrade({
+        landCode,
+        yearMonth,
+      });
 
-    return res.status(HttpStatus.OK).json(newTrade);
+      return res.status(HttpStatus.OK).json(JSON.parse(createResult.data));
+    }
+
+    const fetchResult = await this.tradeService.getData(landCode, yearMonth);
+    return res.status(HttpStatus.OK).json(fetchResult);
   }
 }
