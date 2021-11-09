@@ -4,12 +4,9 @@ import { TradeModule } from './trade/trade.module';
 
 @Module({
   imports: [
-    MongooseModule.forRoot(
-      'mongodb+srv://ys:u2kxuOf3CepG2h5i@mycluster.ak2dl.mongodb.net/tradeDatabase?retryWrites=true&w=majority',
-      {
-        useNewUrlParser: true,
-      },
-    ),
+    MongooseModule.forRoot(process.env.MONGO_DB, {
+      useNewUrlParser: true,
+    }),
     TradeModule,
   ],
   controllers: [],
