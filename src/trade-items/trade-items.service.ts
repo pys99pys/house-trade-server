@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { Injectable } from '@nestjs/common';
-import { TradeItemRowDocument } from './dto/trade-items-document.dto';
-import { GetTradeItemsDTO } from './dto/trade-items.dto';
+import { TradeItemModel } from './models/trade-item.model';
 
 const addZeroPad = (n: number): string => {
   return n.toString().padStart(2, '0');
@@ -14,26 +13,29 @@ const flatSizeFormat = (sizeArea: number): number => {
   return Math.floor(area + addtionalSize);
 };
 
-const parseToTradeItemRowDocument = (row: any): TradeItemRowDocument => ({
+const tradeAmountFormat = (tradeAmount: string): number =>
+  Number(tradeAmount.replace(/[^0-9]/gi, '')) * 10000;
+
+const parseToTradeItem = (row: any): TradeItemModel => ({
   address: row['법정동'].trim(),
   apartName: row['아파트'].trim(),
   areaSize: row['전용면적'],
   buildedYear: row['건축년도'],
   flastSize: flatSizeFormat(row['전용면적']),
   floor: row['층'],
-  tradeAmount: Number(row['거래금액'].replace(/[^0-9]/gi, '')) * 10000,
+  tradeAmount: tradeAmountFormat(row['거래금액']),
   tradeDate: `${row['년']}-${addZeroPad(row['월'])}-${addZeroPad(row['일'])}`,
 });
 
 @Injectable()
 export class TradeItemsService {
   private async getOriginTradeItems(
-    tradeMonth: string,
-    stateCode: string,
+    tradeMonth: number,
+    stateCode: number,
   ): Promise<any[]> {
     const queryParamsArray = [
       `ServiceKey=T5c42lZohslrPE2KbKAhwYE1Q0yVgOROtyX3MFjKpYXWMpuq%2FseIvXUkP37g%2B%2BqmYTKiBBBCvfD4JmsLpzZ4pA%3D%3D`,
-      `DEAL_YMD=${tradeMonth.replace('-', '')}`,
+      `DEAL_YMD=${tradeMonth}`,
       `LAWD_CD=${stateCode}`,
     ];
 
@@ -51,13 +53,14 @@ export class TradeItemsService {
   }
 
   public async getTradeItems(
-    GetTradeItemsDTO: GetTradeItemsDTO,
-  ): Promise<TradeItemRowDocument[]> {
+    tradeMonth: number,
+    stateCode: number,
+  ): Promise<TradeItemModel[]> {
     const originTradeItems = await this.getOriginTradeItems(
-      GetTradeItemsDTO.tradeMonth,
-      GetTradeItemsDTO.stateCode,
+      tradeMonth,
+      stateCode,
     );
 
-    return originTradeItems.map((item) => parseToTradeItemRowDocument(item));
+    return originTradeItems.map((item) => parseToTradeItem(item));
   }
 }
