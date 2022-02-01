@@ -1,4 +1,4 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { Field, Float, Int, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
 export class TradeItemModel {
@@ -8,11 +8,11 @@ export class TradeItemModel {
   @Field()
   apartName: string;
 
-  @Field((type) => Int)
+  @Field((type) => Float)
   areaSize: number;
 
   @Field()
-  readonly buildedYear: number;
+  buildedYear: number;
 
   @Field((type) => Int)
   flastSize: number;
@@ -20,7 +20,7 @@ export class TradeItemModel {
   @Field((type) => Int)
   floor: number;
 
-  @Field((type) => Int)
+  @Field((type) => Float)
   tradeAmount: number;
 
   @Field()
